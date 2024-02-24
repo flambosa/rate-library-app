@@ -1,49 +1,69 @@
 import { useState } from "react";
-import { ControlledPopup } from "./ControlledPop";
-import { RateLibraryForm } from "./RateLibraryForm";
+import { IRateLibraryProps } from "../Models/RateLibraryProps";
+import { getRateLibraries } from "../Hooks/CustomHooks";
 
 export interface RateLibraryProps {
   name: string;
   key: string;
   code: string | undefined;
-  onClick: ((a: RateLibraryProps) => void) | undefined;
+  onClick: ((event: React.MouseEvent<HTMLTableRowElement>, a: RateLibraryProps) => void) | undefined;
+  refresh: (() => void) | undefined;
 }
 
-export function RateLibraryTable() {
-    const [isOpen, setIsOpen] = useState(false);
-    const [rateLibrary, setRateLibrary] = useState<RateLibraryProps | undefined>(undefined);
-    
-    function OpenModalWithRow(row: RateLibraryProps) {
-      setRateLibrary(row);
-      setIsOpen(true);
-    }
-  
-    function CloseModal() {
-      setIsOpen(false);
-    }
-  
-    const libraries: Array<RateLibraryProps> = [{name: 'My First Rate Library', key: "123456", code: undefined, onClick: undefined}, {name: 'My 2nd Rate Library',key: "123456", code: '1234', onClick: undefined}];
-    
-    const tableRows = libraries.map((tableRowProps, index) => RateLibraryTableRow({name: tableRowProps.name, code: tableRowProps.code, key: tableRowProps.key, onClick: OpenModalWithRow}));
-  
-    return (
-      <table>
-        <tr>
-          <th>Name</th>
-          <th>Code</th>
-        </tr>
-        {tableRows}
-        <ControlledPopup isOpen = {isOpen} contentComponent ={RateLibraryForm(rateLibrary)} onCloseClick = {CloseModal}/>
-      </table>
-    );
+export interface RateLibraryTableProps {
+  rateLibraries: IRateLibraryProps[]
+  refresh: () => void;
+}
+
+export function RateLibraryTable(props: RateLibraryTableProps) {
+  const { rateLibraries, refreshItems } = getRateLibraries();
+  // function OpenModalWithRow(event: React.MouseEvent<HTMLTableRowElement>, row: RateLibraryProps) {
+  //   setRateLibrary(row);
+  //   setIsOpen(true);
+  // }
+
+  // function CloseModal() {
+  //   setIsOpen(false);
+  // }
+
+  // const getRateLibraries = () => {
+  //   RateLibraryService.getRateLibraries()
+  //   .then((response: Array<IRateLibraryProps>) => {
+  //     setTableRows(state => response.map((tableRowProps : IRateLibraryProps) => RateLibraryTableRow({name: tableRowProps.name, code: tableRowProps.code, key: tableRowProps.rateLibraryKey, onClick: undefined, refresh: props.refresh})));
+  //   })
+  //   .catch((e : Error) => {
+  //     console.log(e);
+  //   })
+  // }
+
+  return (
+    <table>
+      <tr>
+        <th>Name</th>
+        <th>Code</th>
+      </tr>
+      {rateLibraries.map((tableRowProps: IRateLibraryProps) => (<RateLibraryTableRow name={tableRowProps.name} code={tableRowProps.code} key={tableRowProps.rateLibraryKey} onClick={undefined} refresh={props.refresh}></RateLibraryTableRow>))}
+      {/* <ControlledPopup isOpen = {isOpen} contentComponent ={RateLibraryForm(rateLibrary)} onCloseClick = {CloseModal} refresh={props.refresh}/> */}
+    </table>
+  );
+}
+
+export function RateLibraryTableRow(props: RateLibraryProps) {
+  const [isActive, setIsActive] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
+
+  function OpenModalWithRow(event: React.MouseEvent<HTMLTableRowElement>) {
+    setIsOpen(true);
   }
 
-  function RateLibraryTableRow(props: RateLibraryProps) {
-  
-    return (
-    <tr onClick={(e) => {if(props.onClick !== undefined) {props.onClick(props)}}}>
+  function CloseModal() {
+    setIsOpen(false);
+  }
+
+  return (
+    <tr onClick={(e) => { if (props.onClick !== undefined) { props.onClick(e, props) } }}>
       <td>{props.name}</td>
       <td>{props.code}</td>
     </tr>
-    );
-  }
+  );
+}

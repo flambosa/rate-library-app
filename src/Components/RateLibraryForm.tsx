@@ -65,7 +65,7 @@ export function RateLibraryForm(props: RateLibraryProps | undefined) {
           <th>Rate</th>
         </tr>
         {tableRows}
-        <ControlledPopup isOpen = {isOpen} contentComponent ={RateForm(rate)} onCloseClick = {CloseModal}/>
+        <ControlledPopup isOpen = {isOpen} contentComponent ={RateForm(rate)} onCloseClick = {CloseModal} refresh={undefined}/>
       </BlackTableText>
     );
   
