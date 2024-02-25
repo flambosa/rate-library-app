@@ -5,6 +5,10 @@
   text-align: center;
 }
 
+.active-row {
+  background-color: blue;
+}
+
 .no-click {
   pointer-events: none;
 }

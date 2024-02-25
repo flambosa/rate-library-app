@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { IRateLibraryProps } from "../Models/RateLibraryProps";
-import { getRateLibraries } from "../Hooks/CustomHooks";
+import { getRateLibraries2 } from "../Hooks/CustomHooks";
+import { ControlledPopup } from "./ControlledPop";
+import { RateLibraryForm } from "./RateLibraryForm";
 
-export interface RateLibraryProps {
-  name: string;
-  key: string;
-  code: string | undefined;
-  onClick: ((event: React.MouseEvent<HTMLTableRowElement>, a: RateLibraryProps) => void) | undefined;
+export interface IRateLibraryTableRowProps {
+  data: IRateLibraryProps;
+  isActive: boolean;
+  activateRow: (event: React.MouseEvent<HTMLTableRowElement>, rateLibraryProps: IRateLibraryProps) => void;
+  //onClick: ((event: React.MouseEvent<HTMLTableRowElement>, a: IRateLibraryTableRowProps) => void) | undefined;
   refresh: (() => void) | undefined;
 }
 
@@ -16,25 +18,31 @@ export interface RateLibraryTableProps {
 }
 
 export function RateLibraryTable(props: RateLibraryTableProps) {
-  const { rateLibraries, refreshItems } = getRateLibraries();
-  // function OpenModalWithRow(event: React.MouseEvent<HTMLTableRowElement>, row: RateLibraryProps) {
-  //   setRateLibrary(row);
-  //   setIsOpen(true);
-  // }
+  const { items, activeItem, setActiveItem, refreshItems } = getRateLibraries2();
+  //const [activeRow, setActiveRow] = useState<IRateLibraryProps>();
+  const [isOpen, setIsOpen] = useState(false);
 
-  // function CloseModal() {
-  //   setIsOpen(false);
-  // }
 
-  // const getRateLibraries = () => {
-  //   RateLibraryService.getRateLibraries()
-  //   .then((response: Array<IRateLibraryProps>) => {
-  //     setTableRows(state => response.map((tableRowProps : IRateLibraryProps) => RateLibraryTableRow({name: tableRowProps.name, code: tableRowProps.code, key: tableRowProps.rateLibraryKey, onClick: undefined, refresh: props.refresh})));
-  //   })
-  //   .catch((e : Error) => {
-  //     console.log(e);
-  //   })
-  // }
+  function OpenModalWithRow(rateLibraryProps: IRateLibraryProps) {
+    setIsOpen(true);
+    setActiveItem(rateLibraryProps);
+  }
+
+  function CloseModal() {
+    setIsOpen(false);
+  }
+
+  function ActivateRow(event: React.MouseEvent<HTMLTableRowElement>, rateLibraryProps: IRateLibraryProps) {
+    
+    if (rateLibraryProps !== activeItem) {
+      setActiveItem(rateLibraryProps);
+    }
+
+    const isDoubleClick : boolean = event.detail  === 2;
+    if (isDoubleClick) {
+      setIsOpen(true);
+    }
+  }
 
   return (
     <table>
@@ -42,28 +50,27 @@ export function RateLibraryTable(props: RateLibraryTableProps) {
         <th>Name</th>
         <th>Code</th>
       </tr>
-      {rateLibraries.map((tableRowProps: IRateLibraryProps) => (<RateLibraryTableRow name={tableRowProps.name} code={tableRowProps.code} key={tableRowProps.rateLibraryKey} onClick={undefined} refresh={props.refresh}></RateLibraryTableRow>))}
-      {/* <ControlledPopup isOpen = {isOpen} contentComponent ={RateLibraryForm(rateLibrary)} onCloseClick = {CloseModal} refresh={props.refresh}/> */}
+      {items.map((tableRowProps: IRateLibraryProps, index) => (
+        <RateLibraryTableRow 
+          data = {tableRowProps}
+          isActive = {tableRowProps === activeItem}
+          activateRow = {ActivateRow}
+          refresh={props.refresh}>
+        </RateLibraryTableRow>))}
+      <ControlledPopup isOpen = {isOpen} contentComponent ={RateLibraryForm(activeItem)} onCloseClick = {CloseModal} refresh={props.refresh}/>
     </table>
   );
 }
 
-export function RateLibraryTableRow(props: RateLibraryProps) {
-  const [isActive, setIsActive] = useState(false)
-  const [isOpen, setIsOpen] = useState(false);
-
-  function OpenModalWithRow(event: React.MouseEvent<HTMLTableRowElement>) {
-    setIsOpen(true);
-  }
-
-  function CloseModal() {
-    setIsOpen(false);
-  }
+export function RateLibraryTableRow(props: IRateLibraryTableRowProps) {
 
   return (
-    <tr onClick={(e) => { if (props.onClick !== undefined) { props.onClick(e, props) } }}>
-      <td>{props.name}</td>
-      <td>{props.code}</td>
+    <tr 
+    onClick={(e) => { setTimeout(() => props.activateRow(e, props.data), 50) }} 
+    onDoubleClick={(e) => { props.activateRow(e, props.data) }}
+    className={props.isActive ? 'active-row' : ''}>
+      <td>{props.data.name}</td>
+      <td>{props.data.code}</td>
     </tr>
   );
 }
