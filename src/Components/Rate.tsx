@@ -17,10 +17,11 @@ export function RateTableRow(props: RateRowProps) {
     );
 }
 
+const BlackDiv = styled.div`
+color: black;
+`;
+
 export function RateForm(rateProps: RateRowProps | undefined) {
-  const BlackDiv = styled.div`
-  color: black;
-  `;
 
   return (
       <>

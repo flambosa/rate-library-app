@@ -1,30 +1,63 @@
-import { MouseEventHandler} from "react";
+import { MouseEventHandler } from "react";
 import Popup from "reactjs-popup";
+import ClearIcon from '@mui/icons-material/Clear';
+import styled from "styled-components";
 
 export interface ControlledPopupProps {
-    isOpen : boolean;
-    onCloseClick : MouseEventHandler;
-    refresh: MouseEventHandler | undefined;
-    contentComponent: JSX.Element | null
-  }
-  
-  
-  export function ControlledPopup(props: ControlledPopupProps){
+  isOpen: boolean;
+  title: string,
+  onCloseClick: MouseEventHandler;
+  contentComponent: JSX.Element | null
+}
 
-    let currentModal =  
+const ControlledPopupContainer = styled.div`
+& div.popup-content {
+  padding: 0px;
+}
+`;
+
+const ControlledPopupContent = styled.div`
+`
+const ControlledPopupHeader = styled.div`
+display: flex;
+flex-flow: row nowrap;
+justify-content: space-between;
+align-items: center;
+background-color: lightgrey;
+
+& > h2 {
+  font-size: 15px;
+  color: grey;
+  margin: 0;
+}
+
+& svg {
+  color: grey;
+
+  &:hover {
+    cursor: pointer;
+    background-color: red;
+    color: white;    
+  }
+}
+`;
+
+export function ControlledPopup(props: ControlledPopupProps) {
+
+  let currentModal =
     (
-      <div>
+      <ControlledPopupContainer>
         <Popup open={props.isOpen} closeOnDocumentClick={false} nested={true}>
-          <div className="modal">
-            <a className="close" onClick={props.onCloseClick}>
-              &times;
-            </a>
+          <ControlledPopupContent className="modal">
+            <ControlledPopupHeader>
+              <h2>{props.title}</h2>
+              <ClearIcon onClick={props.onCloseClick}></ClearIcon>
+            </ControlledPopupHeader>
             {props.contentComponent}
-          </div>
-          <button onClick = {props.refresh}>REFRESH</button>
+          </ControlledPopupContent>
         </Popup>
-      </div>
+      </ControlledPopupContainer>
     );
-  
-    return currentModal;
-  };
+
+  return currentModal;
+};

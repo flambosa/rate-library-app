@@ -1,45 +1,17 @@
-import { useEffect, useState } from "react";
-import { RateLibraryService } from "../Controllers/Services/RateLibraryService"
+import { createContext, useEffect, useState } from "react";
+import { rateController, rateLibraryController } from "../Controllers/ControllerSingletons";
 import { IRateLibraryProps } from "../Models/RateLibraryProps";
-import axios, { AxiosResponse } from "axios";
-import { IRateLibraryService } from "../Controllers/Services/IRateLibraryService";
-import { RateLibrariesController } from "../Controllers/RateLibraryControllers";
+import {equals} from "../Utilities/UtilityFunctions";
 
-// export const getRateLibraries = () => {
-//     const [rateLibraries, setRateLibraries] = useState<Array<IRateLibraryProps>>([]);
-//     const [shouldRefresh, setRefresh] = useState(false);
-
-//     useEffect(() => {
-//         RateLibraryService.getRateLibraries()
-//         .then((response) => {
-//           let blah = response;
-//           setRateLibraries(response);
-//         })
-//         .catch((e) => console.log(e));
-//       },[shouldRefresh]);
-
-//       const refreshItems = () => {
-//         setRefresh(!shouldRefresh)
-//       };
-
-//       return {rateLibraries, refreshItems};
-// }
-const rateLibraryService : IRateLibraryService = new RateLibraryService();
-const rateLibraryController : RateLibrariesController = new RateLibrariesController(rateLibraryService);
-
-export const getRateLibraries2 = () => {
+export const getRateLibraries = () => {
   return getItems(() => rateLibraryController.getRateLibraries());
 }
 
-function dummyGetRate(key: string) : Promise<string[]> {
-  return new Promise((resolve, reject) => setTimeout(() => resolve(["1","2"])))
+export const getRates = (key: string) => {
+  return getItems(() => rateController.getRates(key));
 }
 
-export const dummyGetRates = (key: string) => {
-  return getItems(() => dummyGetRate(key));
-}
-
-function getItems<TItem>(serviceCall: () => Promise<Array<TItem>>) {
+function getItems<TItem extends object>(serviceCall: () => Promise<Array<TItem>>) {
   const [items, setItems] = useState<Array<TItem>>([]);
   const [activeItem, setActiveItem] = useState<TItem>()
   const [shouldRefresh, setRefresh] = useState(false);
@@ -47,9 +19,10 @@ function getItems<TItem>(serviceCall: () => Promise<Array<TItem>>) {
   useEffect(() => {
       serviceCall()
       .then((response) => {
-        let blah = response;
         setItems(response);
-        setActiveItem(response?.length > 0 ? response[0] : undefined)
+        // retain currently active item if it still exists in the set of refreshed items
+        const refreshedActiveItem = activeItem !== undefined ? response?.find(item => equals(item, activeItem) === true) : undefined;
+        setActiveItem(refreshedActiveItem ?? (response?.length > 0 ? response[0] : undefined)); 
       })
       .catch((e) => console.log(e));
     },[shouldRefresh]);
@@ -58,5 +31,8 @@ function getItems<TItem>(serviceCall: () => Promise<Array<TItem>>) {
       setRefresh(!shouldRefresh)
     };
 
-    return {items, activeItem, setActiveItem, refreshItems};
+    return {items, setItems, activeItem, setActiveItem, refreshItems};
 }
+
+export const UpsertRowContext = createContext((rateLibraryProps: IRateLibraryProps) => {});
+export const RefreshRateLibrariesContext = createContext(() => {});
