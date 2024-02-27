@@ -14,4 +14,8 @@ export class RateController {
         //     .then((data) => console.log(data))
         // });
     }
+
+    async updateRate(rate: IRateProps) : Promise<IRateProps> {
+        return this.rateService.updateRate(rate);
+    }
 }

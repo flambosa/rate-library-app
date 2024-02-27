@@ -11,8 +11,9 @@ export interface ControlledPopupProps {
 }
 
 const ControlledPopupContainer = styled.div`
-& div.popup-content {
+& div.CARLY-content {
   padding: 0px;
+  width: auto;
 }
 `;
 
@@ -46,8 +47,8 @@ export function ControlledPopup(props: ControlledPopupProps) {
 
   let currentModal =
     (
-      <ControlledPopupContainer>
-        <Popup open={props.isOpen} closeOnDocumentClick={false} nested={true}>
+      <ControlledPopupContainer className="CARL">
+        <Popup open={props.isOpen} closeOnDocumentClick={false} nested={true} className="CARLY">
           <ControlledPopupContent className="modal">
             <ControlledPopupHeader>
               <h2>{props.title}</h2>

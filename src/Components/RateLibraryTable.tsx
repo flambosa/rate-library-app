@@ -1,8 +1,8 @@
 import { useContext, useState } from "react";
 import { IRateLibraryProps } from "../Models/RateLibraryProps";
-import { UpsertRowContext, RefreshRateLibrariesContext, getRateLibraries } from "../Hooks/CustomHooks";
+import { UpsertRateLibraryContext, RefreshRateLibrariesContext, getRateLibraries, CloseRateLibraryModalContext } from "../Hooks/CustomHooks";
 import { ControlledPopup } from "./ControlledPop";
-import { RateLibraryDetail } from "./RateLibraryForm";
+import { RateLibraryView } from "./RateLibraryForm";
 import { EntityOperationsPanel } from "./Button Panels/EntityOperationsPanel";
 import { EntityDashboard, EntityTable, PanelContainer } from "../CSS/Common";
 
@@ -10,7 +10,6 @@ export interface IRateLibraryTableRowProps {
   data: IRateLibraryProps;
   isActive: boolean;
   activateRow: (event: React.MouseEvent<HTMLTableRowElement>, rateLibraryProps: IRateLibraryProps) => void;
-  //onClick: ((event: React.MouseEvent<HTMLTableRowElement>, a: IRateLibraryTableRowProps) => void) | undefined;
 }
 
 export interface IRateLibraryTableProps {
@@ -23,7 +22,6 @@ export function RateLibrariesView() {
   const { items, setItems, activeItem, setActiveItem, refreshItems } = getRateLibraries();
   const [isOpen, setIsOpen] = useState(false);
   const [isInsert, setIsInsert] = useState(false);
-  const refreshRateLibraries = useContext(RefreshRateLibrariesContext);
 
   function CloseModal() {
     setIsOpen(false);
@@ -71,15 +69,17 @@ export function RateLibrariesView() {
 
   return (
     <RefreshRateLibrariesContext.Provider value={refreshItems}>
-      <UpsertRowContext.Provider value={UpsertItem}>
-        <EntityDashboard>
-          <RateLibraryTable items={items} activeItem={activeItem} activateRow={ActivateRow}></RateLibraryTable>
-          <PanelContainer>
-            <EntityOperationsPanel insertHandler={InsertRateLibrary} editHandler={EditRateLibrary} deleteHandler={() => { }} refreshHandler={refreshItems}></EntityOperationsPanel>
-          </PanelContainer>
-        </EntityDashboard>
-        <ControlledPopup isOpen={isOpen} title="Rate Library Properties" contentComponent={<RateLibraryDetail data={activeItem} isInsert={isInsert}></RateLibraryDetail>} onCloseClick={CloseModal} />
-      </UpsertRowContext.Provider>
+      <UpsertRateLibraryContext.Provider value={UpsertItem}>
+        <CloseRateLibraryModalContext.Provider value = {CloseModal}>
+          <EntityDashboard>
+            <RateLibraryTable items={items} activeItem={activeItem} activateRow={ActivateRow}></RateLibraryTable>
+            <PanelContainer>
+              <EntityOperationsPanel insertHandler={InsertRateLibrary} editHandler={EditRateLibrary} deleteHandler={() => {}} refreshHandler={refreshItems}></EntityOperationsPanel>
+            </PanelContainer>
+          </EntityDashboard>
+          <ControlledPopup isOpen={isOpen} title="Rate Library Properties" contentComponent={<RateLibraryView data={isInsert ? undefined : activeItem} isInsert={isInsert}></RateLibraryView>} onCloseClick={CloseModal} />
+        </CloseRateLibraryModalContext.Provider>
+      </UpsertRateLibraryContext.Provider>
     </RefreshRateLibrariesContext.Provider>
   );
 }

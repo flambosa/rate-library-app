@@ -57,8 +57,68 @@ border-width: 1px;
 margin-left: 2px;
 `;
 
+export const FormWithTableContainer = styled.div`
+display: flex;
+flex-flow: column nowrap;
+border-style: solid;
+border-color: grey;
+border-width: 1px;
+margin-left: 2px;
+`;
+
 export const ButtonPanelContainer = styled.div`
 display: flex;
 flex-flow: column nowrap;
 background-color: white;
+`;
+
+export const ButtonContainer = styled.div`
+padding: 5px 10px 5px 10px;
+
+& button {
+    border-style: solid;
+    border-width: 1px;
+    border-color: grey;
+    background-color: lightgrey;
+    color: black;
+    width: 100%;
+    text-transform: capitalize;
+
+    & span.MuiTouchRipple-root {
+        border-style: none;
+
+        &:active, &:focus, &:visited {
+            border-style: none;
+        } 
+    }
+
+    &.insert-button svg {
+        color: green;
+    }
+    &.edit-button svg {
+        color: black;
+    }
+    &.delete-button svg {
+        color: red;
+    }
+    &.refresh-button svg {
+        color: blue;
+    }
+}
+`;
+
+export const FieldsContainer = styled.div`
+display: flex;
+color: black;
+flex-flow: row nowrap;
+justify-content: flex-start; 
+align-items: flex-start;
+gap: 0.5rem;
+margin: 0.75rem;
+`;
+
+export const PartialFieldsContainer = styled.div`
+display: flex;
+flex-flow: row nowrap;
+justify-content: center; 
 `;

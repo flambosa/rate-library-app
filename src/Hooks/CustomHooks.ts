@@ -2,6 +2,7 @@ import { createContext, useEffect, useState } from "react";
 import { rateController, rateLibraryController } from "../Controllers/ControllerSingletons";
 import { IRateLibraryProps } from "../Models/RateLibraryProps";
 import {equals} from "../Utilities/UtilityFunctions";
+import { IRateProps } from "../Models/RateProps";
 
 export const getRateLibraries = () => {
   return getItems(() => rateLibraryController.getRateLibraries());
@@ -34,5 +35,9 @@ function getItems<TItem extends object>(serviceCall: () => Promise<Array<TItem>>
     return {items, setItems, activeItem, setActiveItem, refreshItems};
 }
 
-export const UpsertRowContext = createContext((rateLibraryProps: IRateLibraryProps) => {});
+export const UpsertRateLibraryContext = createContext((rateLibraryProps: IRateLibraryProps) => {});
+export const UpsertRateContext = createContext((rateProps: IRateProps) => {});
 export const RefreshRateLibrariesContext = createContext(() => {});
+export const RefreshRatesContext = createContext((key: string) => {});
+export const CloseRateLibraryModalContext = createContext(() => {});
+export const CloseRateModalContext = createContext(() => {});

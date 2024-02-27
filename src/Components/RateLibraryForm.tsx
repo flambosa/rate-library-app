@@ -2,30 +2,40 @@ import styled from "styled-components";
 import { IRateLibraryProps } from "../Models/RateLibraryProps";
 import { useContext, useState } from "react";
 import { rateLibraryController } from "../Controllers/ControllerSingletons";
-import { UpsertRowContext } from "../Hooks/CustomHooks";
+import { CloseRateLibraryModalContext, CloseRateModalContext, RefreshRateLibrariesContext, RefreshRatesContext, UpsertRateContext, UpsertRateLibraryContext, getRates } from "../Hooks/CustomHooks";
+import { IRateProps } from "../Models/RateProps";
+import { EntityDashboard, EntityTable, FieldsContainer, FormWithTableContainer, PanelContainer, PartialFieldsContainer } from "../CSS/Common";
+import { EntityOperationsPanel } from "./Button Panels/EntityOperationsPanel";
+import { EntityUpsertPanel } from "./Button Panels/EntityUpsertPanel";
+import { RateTableRow, RateView } from "./Rate";
+import { ControlledPopup } from "./ControlledPop";
 
 export interface IRateLibraryFormProps {
   data : IRateLibraryProps | undefined;
   isInsert : boolean;
 }
 
-const FieldsContainer = styled.div`
-display: flex;
-flex-flow: row nowrap;
-justify-content: space-between; 
-`;
-
-const PartialFieldsContainer = styled.div`
-display: flex;
-flex-flow: row nowrap;
-justify-content: center; 
-`;
-
 const FieldLabelsContainer = styled.div`
 display: flex;
 flex-flow: column nowrap;
 align-items: flex-end;
 justify-content: space-around;
+gap: 0.1rem;
+margin-right: 0.5rem;
+font-size: 1rem;
+
+& label {
+  padding: 0.3rem;
+  min-width: 10rem;
+  text-align: right;
+}
+`;
+
+const NoteLabelContainer = styled.div`
+display: flex;
+flex-flow: column nowrap;
+align-items: flex-end;
+justify-content: flex-start;
 gap: 0.1rem;
 margin-right: 0.5rem;
 font-size: 1rem;
@@ -50,6 +60,19 @@ gap: 0.1rem;
   border-width: 1px;
   font-size: 1rem;
 
+  &#rlName {
+    width: 15rem;
+  }
+
+  &#rlCode {
+    width: 5rem;
+  }
+
+  &#rlNotes {
+    width: 20rem;
+    height: 15rem;
+  }
+
   &.checkbox-wrapper {
     width: 1rem;
     height: 1rem;
@@ -62,20 +85,95 @@ gap: 0.1rem;
 }
 `;
 
-const BlackDiv = styled.div`
-color: black;
+const NoteInputContainer = styled.div`
+display: flex;
+flex-flow: column nowrap;
+align-items: flex-start;
+justify-content: flex-start;
+gap: 0.1rem;
+
+& > textarea {
+  color: black;
+  background-color: white;
+  border-style: solid;
+  border-color: grey;
+  border-width: 1px;
+  font-size: 1rem;
+  width: 20rem;
+  height: 15rem;
 `;
 
-export function RateLibraryDetail(props: IRateLibraryFormProps) {
-  
-    return (
-      <>
-      <BlackDiv>
-        <RateLibraryForm data={props.isInsert ? undefined : props.data} isInsert={props.isInsert}></RateLibraryForm>
-      {/* {RatesTable(props)} */}
-      </BlackDiv>
-      </>
-    );
+export function RateLibraryView(props: IRateLibraryFormProps) {
+  const { items, setItems, activeItem, setActiveItem, refreshItems } = getRates(props.data?.rateLibraryKey ?? '');
+  const [isOpen, setIsOpen] = useState(false);
+  const [isInsert, setIsInsert] = useState(props.isInsert);
+  const refreshRateLibraries = useContext(RefreshRateLibrariesContext);
+  const closeRateLibraryModal = useContext(CloseRateLibraryModalContext);
+
+  function CloseModal() {
+    setIsOpen(false);
+  }
+
+  function ActivateRow(event: React.MouseEvent<HTMLTableRowElement>, rateProps: IRateProps) {
+
+    if (rateProps !== activeItem) {
+      setActiveItem(rateProps);
+    }
+
+    const isDoubleClick: boolean = event.detail === 2;
+    if (isDoubleClick) {
+      setIsOpen(true);
+    }
+  }
+
+  function UpsertItem(rateProps: IRateProps) {
+
+    const itemIndex = items.findIndex(item => item.rateKey === rateProps.rateKey)
+
+    let itemsCopy = [...items];
+    // update
+    if (itemIndex >= 0) {
+      itemsCopy[itemIndex] = rateProps;
+    }
+    // insert
+    else {
+      itemsCopy.push(rateProps);
+    }
+    setItems(itemsCopy);
+    setActiveItem(rateProps);
+    setIsInsert(false);
+    CloseModal();
+  }
+
+  function InsertRateLibrary() {
+    setIsOpen(true);
+    setIsInsert(true);
+  }
+
+  function EditRateLibrary() {
+    setIsOpen(true)
+    setIsInsert(false);
+  }
+
+  return (
+    <RefreshRatesContext.Provider value={refreshItems}>
+      <UpsertRateContext.Provider value={UpsertItem}>
+        <CloseRateModalContext.Provider value = {CloseModal}>
+          <EntityDashboard>
+            <FormWithTableContainer>
+              <RateLibraryForm data={isInsert ? undefined : props.data} isInsert={isInsert}></RateLibraryForm>
+              <RatesTable items={isInsert ? [] : items} activeItem={activeItem} activateRow={ActivateRow}></RatesTable>
+            </FormWithTableContainer>
+            <PanelContainer>
+              <EntityUpsertPanel isInsert={isInsert} upsertFormName="rate-library-upsert" cancelHandler={closeRateLibraryModal}></EntityUpsertPanel>
+              <EntityOperationsPanel insertHandler={InsertRateLibrary} editHandler={EditRateLibrary} deleteHandler={() => { }} refreshHandler={refreshItems}></EntityOperationsPanel>
+            </PanelContainer>
+          </EntityDashboard>
+          <ControlledPopup isOpen={isOpen} title="Rate Properties" contentComponent={<RateView data={isInsert ? undefined : activeItem} rateLibrary={props.data!} isInsert={isInsert}></RateView>} onCloseClick={CloseModal} />
+        </CloseRateModalContext.Provider>
+      </UpsertRateContext.Provider>
+    </RefreshRatesContext.Provider>
+  );
   }
 
   export function RateLibraryForm(props: IRateLibraryFormProps) {
@@ -84,7 +182,7 @@ export function RateLibraryDetail(props: IRateLibraryFormProps) {
     const [ locked, setLocked ] = useState(props.data?.locked ?? false);
     const [ notes, setNotes ] = useState(props.data?.notes ?? '');
     const [ rateLibrary, setRateLibrary ] = useState(props.data);
-    const upsertRow = useContext(UpsertRowContext);
+    const upsertRow = useContext(UpsertRateLibraryContext);
 
     function submitRateLibrary(e: React.FormEvent<HTMLFormElement>) {
       // prevent page reload
@@ -136,7 +234,7 @@ export function RateLibraryDetail(props: IRateLibraryFormProps) {
     }
 
     return (
-      <form onSubmit={(e) => submitRateLibrary(e)}>
+      <form onSubmit={(e) => submitRateLibrary(e)} id="rate-library-upsert">
         <FieldsContainer>
           <PartialFieldsContainer>
             <FieldLabelsContainer>
@@ -157,12 +255,12 @@ export function RateLibraryDetail(props: IRateLibraryFormProps) {
             </FieldInputsContainer>
           </PartialFieldsContainer>
           <PartialFieldsContainer>
-            <FieldLabelsContainer>
+            <NoteLabelContainer>
               <label htmlFor="rlDateModified">Notes:</label>
-            </FieldLabelsContainer>
-            <FieldInputsContainer>
-              <input id="rlNotes" name="rlNotes" type="text" value={notes} onChange={(e) => setNotes(e.target.value)}></input>
-            </FieldInputsContainer>
+            </NoteLabelContainer>
+            <NoteInputContainer>
+              <textarea id="rlNotes" name="rlNotes" value={notes} onChange={(e) => setNotes(e.target.value)}></textarea>
+            </NoteInputContainer>
           </PartialFieldsContainer>
         </FieldsContainer>
       </form>
@@ -170,41 +268,34 @@ export function RateLibraryDetail(props: IRateLibraryFormProps) {
   }
 
 
+  export interface IRatesTableProps {
+    items: IRateProps[];
+    activeItem: IRateProps | undefined;
+    activateRow: (event: React.MouseEvent<HTMLTableRowElement>, rateProps: IRateProps) => void;
+  }
 
-//  export function RatesTable(props: RateLibraryProps | undefined) {
-//     const [isOpen, setIsOpen] = useState(false);
-//     const [rate, setRate] = useState<RateRowProps | undefined>(undefined);
+ export function RatesTable(props: IRatesTableProps) {
     
-//     function OpenModalWithRow(row: RateRowProps) {
-//       setRate(row);
-//       setIsOpen(true);
-//     }
-  
-//     function CloseModal() {
-//       setIsOpen(false);
-//     }
-  
-//     const rates: Array<RateRowProps> = [
-//       {itemCode: "1", description: "Item 1", rate: 2.0, onClick: undefined},
-//       {itemCode: "2", description: "Item 2", rate: 4.0, onClick: undefined}
-//     ];
-  
-//     const tableRows = rates.map((tableRowProps, index) => RateTableRow({itemCode: tableRowProps.itemCode, description: tableRowProps.description, rate: tableRowProps.rate, onClick: OpenModalWithRow}));
-  
-//     const BlackTableText = styled.table`
-//     color: black;
-//     `;   
-
-//     return (
-//       <BlackTableText>
-//         <tr>
-//           <th>Item Code</th>
-//           <th>Description</th>
-//           <th>Rate</th>
-//         </tr>
-//         {tableRows}
-//         <ControlledPopup isOpen = {isOpen} contentComponent ={RateForm(rate)} onCloseClick = {CloseModal} refresh={undefined}/>
-//       </BlackTableText>
-//     );
-  
-//   }
+  return (
+    <>
+      <EntityTable>
+        <tr>
+          <th>Item Code</th>
+          <th>Description</th>
+          <th>Group</th>
+          <th>Rate</th>
+          <th>UOM</th>
+          <th>Date Added</th>
+          <th>Date Modified</th>
+        </tr>
+        {props.items.map((tableRowProps: IRateProps) => (
+          <RateTableRow
+            key={tableRowProps.rateKey}
+            data={tableRowProps}
+            isActive={tableRowProps === props.activeItem}
+            activateRow={props.activateRow}>
+          </RateTableRow>))}
+      </EntityTable>
+    </>
+  );
+  }

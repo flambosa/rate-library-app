@@ -340,4 +340,8 @@ export class RateService implements IRateService {
         return new Promise<Array<IRateProps>>((resolve, reject) => {setTimeout(() => {resolve(rateLibraryArray)})})
         //return http.get<IRateLibraryProps[]>("/RateLibraries");
     };
+
+    updateRate = (rate: IRateProps) => {
+        return new Promise<IRateProps>((resolve, reject) => {setTimeout(() => {resolve(rate)})})
+    };
 }

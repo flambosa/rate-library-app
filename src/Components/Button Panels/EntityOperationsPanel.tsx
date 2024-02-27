@@ -3,8 +3,7 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import ClearIcon from '@mui/icons-material/Clear';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import {  ButtonPanelContainer } from '../../CSS/Common';
-import styled from 'styled-components';
+import {  ButtonContainer, ButtonPanelContainer } from '../../CSS/Common';
 
 export interface IEntityOperationsProps {
     insertHandler: () => void;
@@ -12,41 +11,6 @@ export interface IEntityOperationsProps {
     deleteHandler: () => void;
     refreshHandler: () => void;
 }
-
-export const ButtonContainer = styled.div`
-padding: 5px 10px 5px 10px;
-
-& button {
-    border-style: solid;
-    border-width: 1px;
-    border-color: grey;
-    background-color: lightgrey;
-    color: black;
-    width: 100%;
-    text-transform: capitalize;
-
-    & span.MuiTouchRipple-root {
-        border-style: none;
-
-        &:active, &:focus, &:visited {
-            border-style: none;
-        } 
-    }
-
-    &.insert-button svg {
-        color: green;
-    }
-    &.edit-button svg {
-        color: black;
-    }
-    &.delete-button svg {
-        color: red;
-    }
-    &.refresh-button svg {
-        color: blue;
-    }
-}
-`;
 
 export function EntityOperationsPanel(props: IEntityOperationsProps) {
 
