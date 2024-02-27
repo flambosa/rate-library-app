@@ -5,7 +5,7 @@ import { IRateLibraryService } from "./IRateLibraryService";
 
 export class RateLibraryService implements IRateLibraryService {
 
-    getRateLibraries = () => {
+    getRateLibraries = async () => {
         let result = {
             "@odata.context": "https://localhost:17032/odata/v1.0/$metadata#RateLibraries",
             "value": [
@@ -36,7 +36,8 @@ export class RateLibraryService implements IRateLibraryService {
     
         //const rateLibraryArray = result.value.map(rateLibrary => MapToIRateLibraryProps(rateLibrary));
         //return new Promise<Array<IRateLibraryProps>>((resolve, reject) => {setTimeout(() => {resolve(rateLibraryArray)})})
-        return http.get<any>("/RateLibraries");
+        var response = await http.get<any>("/RateLibraries");
+        return response.data.value.map((item : any) => MapToIRateLibraryProps(item));
     };
 
     updateRateLibrary = (rateLibrary: IRateLibraryProps) => {

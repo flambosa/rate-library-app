@@ -8,8 +8,7 @@ export class RateController {
     
     async getRates(rateLibraryKey: string) : Promise<IRateProps[]> {
 
-        var response = await this.rateService.getRates(rateLibraryKey);
-        return response.data.value.map((item : any) => MapToIRateProps(item));
+        return await this.rateService.getRates(rateLibraryKey);
     }
 
     async updateRate(rate: IRateProps) : Promise<IRateProps> {

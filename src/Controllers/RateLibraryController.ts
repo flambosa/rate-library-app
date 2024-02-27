@@ -9,7 +9,7 @@ export class RateLibrariesController {
     async getRateLibraries() : Promise<IRateLibraryProps[]> {
 
         var response = await this.rateLibraryService.getRateLibraries();
-        return response.data.value.map((item : any) => MapToIRateLibraryProps(item));
+        return response;
     }
 
     async updateRateLibrary(rateLibrary: IRateLibraryProps) : Promise<IRateLibraryProps> {

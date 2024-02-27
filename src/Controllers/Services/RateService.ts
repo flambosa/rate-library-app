@@ -5,7 +5,7 @@ import http from "../../http-common"
 
 export class RateService implements IRateService {
 
-    getRates = (rateLibraryKey: string) => {
+    getRates = async (rateLibraryKey: string) => {
         let allRates = {
             "@odata.context": "https://localhost:17032/odata/v1.0/$metadata#Rates",
             "value": [
@@ -348,7 +348,8 @@ export class RateService implements IRateService {
         }
         const rateLibraryArray = result.map(rates => MapToIRateProps(rates));
         //return new Promise<Array<IRateProps>>((resolve, reject) => {setTimeout(() => {resolve(rateLibraryArray)})})
-        return http.get<any>(`/RateLibraries(${rateLibraryKey})/Rates`);
+        var response = await http.get<any>(`/RateLibraries(${rateLibraryKey})/Rates`);
+        return response.data.value.map((item : any) => MapToIRateProps(item));
     };
 
     updateRate = (rate: IRateProps) => {
