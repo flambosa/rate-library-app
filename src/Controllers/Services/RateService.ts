@@ -347,8 +347,8 @@ export class RateService implements IRateService {
             result = allRates.value.slice(allRates.value.length-3, allRates.value.length-1);
         }
         const rateLibraryArray = result.map(rates => MapToIRateProps(rates));
-        return new Promise<Array<IRateProps>>((resolve, reject) => {setTimeout(() => {resolve(rateLibraryArray)})})
-        //return http.get<IRateProps[]>("/RateLibraries");
+        //return new Promise<Array<IRateProps>>((resolve, reject) => {setTimeout(() => {resolve(rateLibraryArray)})})
+        return http.get<any>(`/RateLibraries(${rateLibraryKey})/Rates`);
     };
 
     updateRate = (rate: IRateProps) => {

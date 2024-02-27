@@ -1,5 +1,5 @@
 import { AxiosResponse } from "axios";
-import { IRateProps } from "../Models/RateProps";
+import { IRateProps, MapToIRateProps } from "../Models/RateProps";
 import { IRateService } from "./Services/IRateService";
 
 export class RateController {
@@ -8,12 +8,8 @@ export class RateController {
     
     async getRates(rateLibraryKey: string) : Promise<IRateProps[]> {
 
-        return this.rateService.getRates(rateLibraryKey)
-        // const {} = useAsync(() => {
-        //     this.rateLibraryService.getRateLibraries()
-        //     .then((response) => {return rateLibraryArray})
-        //     .then((data) => console.log(data))
-        // });
+        var response = await this.rateService.getRates(rateLibraryKey);
+        return response.data.value.map((item : any) => MapToIRateProps(item));
     }
 
     async updateRate(rate: IRateProps) : Promise<IRateProps> {

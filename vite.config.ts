@@ -9,7 +9,7 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'https://localhost:17032', // The API is running locally via IIS on this port
-        changeOrigin: true,
+        changeOrigin: false,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, '') // The local API has a slightly different path
       }

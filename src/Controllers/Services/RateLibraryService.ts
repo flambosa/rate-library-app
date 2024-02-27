@@ -34,9 +34,9 @@ export class RateLibraryService implements IRateLibraryService {
             ]
         }
     
-        const rateLibraryArray = result.value.map(rateLibrary => MapToIRateLibraryProps(rateLibrary));
-        return new Promise<Array<IRateLibraryProps>>((resolve, reject) => {setTimeout(() => {resolve(rateLibraryArray)})})
-        //return http.get<IRateLibraryProps[]>("/RateLibraries");
+        //const rateLibraryArray = result.value.map(rateLibrary => MapToIRateLibraryProps(rateLibrary));
+        //return new Promise<Array<IRateLibraryProps>>((resolve, reject) => {setTimeout(() => {resolve(rateLibraryArray)})})
+        return http.get<any>("/RateLibraries");
     };
 
     updateRateLibrary = (rateLibrary: IRateLibraryProps) => {
