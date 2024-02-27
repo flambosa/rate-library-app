@@ -18,3 +18,19 @@ export function equals<TItem extends Object>(item1 : TItem, item2: TItem) : bool
     
     return true;
   }
+
+  export function reformatDate(dateString: string | undefined) : string {
+
+    if (dateString === undefined || dateString === null || dateString === '') {
+      return '';
+    }
+
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString();
+    }
+    catch(e) {
+      console.log(e);
+      return dateString;
+    }
+  }

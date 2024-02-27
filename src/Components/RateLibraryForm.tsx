@@ -4,11 +4,12 @@ import { useContext, useState } from "react";
 import { rateLibraryController } from "../Controllers/ControllerSingletons";
 import { CloseRateLibraryModalContext, CloseRateModalContext, RefreshRateLibrariesContext, RefreshRatesContext, UpsertRateContext, UpsertRateLibraryContext, getRates } from "../Hooks/CustomHooks";
 import { IRateProps } from "../Models/RateProps";
-import { EntityDashboard, EntityTable, FieldsContainer, FormWithTableContainer, PanelContainer, PartialFieldsContainer } from "../CSS/Common";
+import { EmptyTableContent, EntityDashboard, EntityTable, FieldsContainer, FormWithTableContainer, PanelContainer, PartialFieldsContainer } from "../CSS/Common";
 import { EntityOperationsPanel } from "./Button Panels/EntityOperationsPanel";
 import { EntityUpsertPanel } from "./Button Panels/EntityUpsertPanel";
 import { RateTableRow, RateView } from "./Rate";
 import { ControlledPopup } from "./ControlledPop";
+import { reformatDate } from "../Utilities/UtilityFunctions";
 
 export interface IRateLibraryFormProps {
   data : IRateLibraryProps | undefined;
@@ -60,6 +61,11 @@ gap: 0.1rem;
   border-width: 1px;
   font-size: 1rem;
 
+  &:disabled {
+    background-color:lightgrey;
+    color: darkgrey;
+  }
+
   &#rlName {
     width: 15rem;
   }
@@ -106,7 +112,9 @@ gap: 0.1rem;
 export function RateLibraryView(props: IRateLibraryFormProps) {
   const { items, setItems, activeItem, setActiveItem, refreshItems } = getRates(props.data?.rateLibraryKey ?? '');
   const [isOpen, setIsOpen] = useState(false);
-  const [isInsert, setIsInsert] = useState(props.isInsert);
+  const [isInsertRate, setIsInsertRate] = useState(false);
+  const [sortKey, setSortKey] = useState('');
+  const [isInvertedSortKey, invertSortKey] = useState(false);
   const refreshRateLibraries = useContext(RefreshRateLibrariesContext);
   const closeRateLibraryModal = useContext(CloseRateLibraryModalContext);
 
@@ -122,7 +130,7 @@ export function RateLibraryView(props: IRateLibraryFormProps) {
 
     const isDoubleClick: boolean = event.detail === 2;
     if (isDoubleClick) {
-      setIsOpen(true);
+      EditRate();
     }
   }
 
@@ -141,18 +149,43 @@ export function RateLibraryView(props: IRateLibraryFormProps) {
     }
     setItems(itemsCopy);
     setActiveItem(rateProps);
-    setIsInsert(false);
+    setIsInsertRate(false);
     CloseModal();
   }
 
-  function InsertRateLibrary() {
+  function InsertRate() {
     setIsOpen(true);
-    setIsInsert(true);
+    setIsInsertRate(true);
   }
 
-  function EditRateLibrary() {
+  function EditRate() {
     setIsOpen(true)
-    setIsInsert(false);
+    setIsInsertRate(false);
+  }
+
+  function SortItems(propName: string) {
+    
+    let invertSort : boolean = false;
+    if (sortKey == propName) {
+      invertSort = !isInvertedSortKey;
+      invertSortKey(invertSort);
+    }
+
+    const propKey = propName as keyof IRateProps;
+    const sortedItems = items.sort((rate1, rate2) => {
+      if (rate1[propKey] > rate2[propKey]) {
+        return invertSort ? -1 : 1;
+      }
+
+      if (rate1[propKey] < rate2[propKey]) {
+        return invertSort ? 1 : -1;
+      }
+
+      return 0;
+    })
+
+    setSortKey(propName);
+    setItems(sortedItems);
   }
 
   return (
@@ -161,15 +194,15 @@ export function RateLibraryView(props: IRateLibraryFormProps) {
         <CloseRateModalContext.Provider value = {CloseModal}>
           <EntityDashboard>
             <FormWithTableContainer>
-              <RateLibraryForm data={isInsert ? undefined : props.data} isInsert={isInsert}></RateLibraryForm>
-              <RatesTable items={isInsert ? [] : items} activeItem={activeItem} activateRow={ActivateRow}></RatesTable>
+              <RateLibraryForm data={props.isInsert ? undefined : props.data} isInsert={props.isInsert}></RateLibraryForm>
+              <RatesTable items={props.isInsert ? [] : items} activeItem={activeItem} activateRow={ActivateRow} sortHandler={SortItems}></RatesTable>
             </FormWithTableContainer>
             <PanelContainer>
-              <EntityUpsertPanel isInsert={isInsert} upsertFormName="rate-library-upsert" cancelHandler={closeRateLibraryModal}></EntityUpsertPanel>
-              <EntityOperationsPanel insertHandler={InsertRateLibrary} editHandler={EditRateLibrary} deleteHandler={() => { }} refreshHandler={refreshItems}></EntityOperationsPanel>
+              <EntityUpsertPanel isInsert={props.isInsert} upsertFormName="rate-library-upsert" cancelHandler={closeRateLibraryModal}></EntityUpsertPanel>
+              <EntityOperationsPanel disable={props.isInsert} insertHandler={InsertRate} editHandler={EditRate} deleteHandler={() => { }} refreshHandler={refreshItems}></EntityOperationsPanel>
             </PanelContainer>
           </EntityDashboard>
-          <ControlledPopup isOpen={isOpen} title="Rate Properties" contentComponent={<RateView data={isInsert ? undefined : activeItem} rateLibrary={props.data!} isInsert={isInsert}></RateView>} onCloseClick={CloseModal} />
+          <ControlledPopup isOpen={isOpen} title="Rate Properties" contentComponent={<RateView data={isInsertRate ? undefined : activeItem} rateLibrary={props.data!} isInsert={isInsertRate}></RateView>} onCloseClick={CloseModal} />
         </CloseRateModalContext.Provider>
       </UpsertRateContext.Provider>
     </RefreshRatesContext.Provider>
@@ -199,7 +232,7 @@ export function RateLibraryView(props: IRateLibraryFormProps) {
           updatedRateLibrary.locked = locked;
           updatedRateLibrary.notes = notes;
           
-          if(props.isInsert) {
+          if(!props.isInsert) {
             updatedRateLibrary.dateModified = new Date().toLocaleString();
           }
           // POST request to update rate library
@@ -245,13 +278,13 @@ export function RateLibraryView(props: IRateLibraryFormProps) {
               <label htmlFor="rlDateModified">Date Modified:</label>
             </FieldLabelsContainer>
             <FieldInputsContainer>
-              <input id="rlName" name="rlName" type="text" value={props.data?.name} readOnly={!props.isInsert} onChange={(e) => setName(e.target.value)}></input>
+              <input id="rlName" name="rlName" type="text" value={props.data?.name} readOnly={!props.isInsert} disabled={!props.isInsert} onChange={(e) => setName(e.target.value)}></input>
               <input id="rlCode" name="rlCode" type="text" value={code} onChange={(e) => setCode(e.target.value)}></input>
               <div className="checkbox-wrapper">
                 <input id="rlLocked" name="rlLocked" type="checkbox" value={locked?.toString()} checked={locked} onChange={(e) => setLocked(e.target.checked)}></input>
               </div>
-              <input id="rlDateAdded" className="display-field" name="rlDateAdded" type="text" value={props.data?.dateAdded} readOnly={true}></input>
-              <input id="rlDateModified" className="display-field" name="rlDateModified" type="text" value={props.data?.dateAdded} readOnly={true}></input>
+              <input id="rlDateAdded" className="display-field" name="rlDateAdded" type="text" value={reformatDate(props.data?.dateAdded)} readOnly={true}></input>
+              <input id="rlDateModified" className="display-field" name="rlDateModified" type="text" value={reformatDate(props.data?.dateModified)} readOnly={true}></input>
             </FieldInputsContainer>
           </PartialFieldsContainer>
           <PartialFieldsContainer>
@@ -272,22 +305,37 @@ export function RateLibraryView(props: IRateLibraryFormProps) {
     items: IRateProps[];
     activeItem: IRateProps | undefined;
     activateRow: (event: React.MouseEvent<HTMLTableRowElement>, rateProps: IRateProps) => void;
+    sortHandler: (propKey : string) => void;
   }
 
+  const ScrollableTableWrapper = styled.div`
+  max-height: 40vh;
+  overflow-y:auto;
+  overflow-x: hidden;
+  style: overflow-y:scroll;
+  width: 70vw;
+  font-size: 0.75rem;
+  
+  & th:hover {
+    cursor: pointer;
+  }
+  `
+
  export function RatesTable(props: IRatesTableProps) {
-    
+
   return (
-    <>
+    <ScrollableTableWrapper>
       <EntityTable>
         <tr>
-          <th>Item Code</th>
-          <th>Description</th>
-          <th>Group</th>
-          <th>Rate</th>
-          <th>UOM</th>
-          <th>Date Added</th>
-          <th>Date Modified</th>
+          <th onClick={() => props.sortHandler("itemCode")}>Item Code</th>
+          <th onClick={() => props.sortHandler("description")}>Description</th>
+          <th onClick={() => props.sortHandler("rateGroup")}>Group</th>
+          <th onClick={() => props.sortHandler("value")}>Rate</th>
+          <th onClick={() => props.sortHandler("unitOfMeasure")}>UOM</th>
+          <th onClick={() => props.sortHandler("dateAdded")}>Date Added</th>
+          <th onClick={() => props.sortHandler("dateModified")}>Date Modified</th>
         </tr>
+        {(props.items.length == 0) && <EmptyTableContent>No Rates to Display</EmptyTableContent>}
         {props.items.map((tableRowProps: IRateProps) => (
           <RateTableRow
             key={tableRowProps.rateKey}
@@ -296,6 +344,6 @@ export function RateLibraryView(props: IRateLibraryFormProps) {
             activateRow={props.activateRow}>
           </RateTableRow>))}
       </EntityTable>
-    </>
+    </ScrollableTableWrapper>
   );
   }

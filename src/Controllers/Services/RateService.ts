@@ -1,10 +1,12 @@
 import { IRateService } from "./IRateService";
 import { IRateProps, MapToIRateProps } from "../../Models/RateProps";
+import { IRateLibraryProps } from "../../Models/RateLibraryProps";
+import http from "../../http-common"
 
 export class RateService implements IRateService {
 
     getRates = (rateLibraryKey: string) => {
-        let result = {
+        let allRates = {
             "@odata.context": "https://localhost:17032/odata/v1.0/$metadata#Rates",
             "value": [
                 {
@@ -336,9 +338,17 @@ export class RateService implements IRateService {
             "@odata.nextLink": "https://localhost:17032/odata/v1.0/RateLibraries(d897d324-9bb4-452f-b0ab-8a57728a8455)/Rates?$skiptoken=RateKey-17680a47-10ab-4c27-bea7-bb1b4bc8238b"
         }
     
-        const rateLibraryArray = result.value.map(rates => MapToIRateProps(rates));
+        let result : any[];
+        const splitter = Math.round((allRates.value.length - 1)/2);
+        if (rateLibraryKey === "d897d324-9bb4-452f-b0ab-8a57728a8455") {
+            result = allRates.value;
+        }
+        else {
+            result = allRates.value.slice(allRates.value.length-3, allRates.value.length-1);
+        }
+        const rateLibraryArray = result.map(rates => MapToIRateProps(rates));
         return new Promise<Array<IRateProps>>((resolve, reject) => {setTimeout(() => {resolve(rateLibraryArray)})})
-        //return http.get<IRateLibraryProps[]>("/RateLibraries");
+        //return http.get<IRateProps[]>("/RateLibraries");
     };
 
     updateRate = (rate: IRateProps) => {

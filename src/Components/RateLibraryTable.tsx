@@ -1,10 +1,11 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { IRateLibraryProps } from "../Models/RateLibraryProps";
 import { UpsertRateLibraryContext, RefreshRateLibrariesContext, getRateLibraries, CloseRateLibraryModalContext } from "../Hooks/CustomHooks";
 import { ControlledPopup } from "./ControlledPop";
 import { RateLibraryView } from "./RateLibraryForm";
 import { EntityOperationsPanel } from "./Button Panels/EntityOperationsPanel";
-import { EntityDashboard, EntityTable, PanelContainer } from "../CSS/Common";
+import { EmptyTableContent, EntityDashboard, EntityTable, PanelContainer } from "../CSS/Common";
+import styled from "styled-components";
 
 export interface IRateLibraryTableRowProps {
   data: IRateLibraryProps;
@@ -35,7 +36,7 @@ export function RateLibrariesView() {
 
     const isDoubleClick: boolean = event.detail === 2;
     if (isDoubleClick) {
-      setIsOpen(true);
+      EditRateLibrary();
     }
   }
 
@@ -74,7 +75,7 @@ export function RateLibrariesView() {
           <EntityDashboard>
             <RateLibraryTable items={items} activeItem={activeItem} activateRow={ActivateRow}></RateLibraryTable>
             <PanelContainer>
-              <EntityOperationsPanel insertHandler={InsertRateLibrary} editHandler={EditRateLibrary} deleteHandler={() => {}} refreshHandler={refreshItems}></EntityOperationsPanel>
+              <EntityOperationsPanel disable={false} insertHandler={InsertRateLibrary} editHandler={EditRateLibrary} deleteHandler={() => {}} refreshHandler={refreshItems}></EntityOperationsPanel>
             </PanelContainer>
           </EntityDashboard>
           <ControlledPopup isOpen={isOpen} title="Rate Library Properties" contentComponent={<RateLibraryView data={isInsert ? undefined : activeItem} isInsert={isInsert}></RateLibraryView>} onCloseClick={CloseModal} />
@@ -93,6 +94,7 @@ export function RateLibraryTable(props: IRateLibraryTableProps) {
           <th>Name</th>
           <th>Code</th>
         </tr>
+        {(props.items.length == 0) && <EmptyTableContent>No Rate Libraries to Display</EmptyTableContent>}
         {props.items.map((tableRowProps: IRateLibraryProps) => (
           <RateLibraryTableRow
             key={tableRowProps.rateLibraryKey}

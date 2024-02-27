@@ -3,6 +3,7 @@ import { rateController, rateLibraryController } from "../Controllers/Controller
 import { IRateLibraryProps } from "../Models/RateLibraryProps";
 import {equals} from "../Utilities/UtilityFunctions";
 import { IRateProps } from "../Models/RateProps";
+import { AxiosResponse } from "axios";
 
 export const getRateLibraries = () => {
   return getItems(() => rateLibraryController.getRateLibraries());

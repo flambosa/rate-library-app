@@ -1,3 +1,4 @@
+import { AxiosResponse } from "axios";
 import { IRateProps } from "../Models/RateProps";
 import { IRateService } from "./Services/IRateService";
 

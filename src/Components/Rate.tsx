@@ -1,14 +1,12 @@
 import styled from "styled-components";
 import { IRateProps } from "../Models/RateProps";
 import { useContext, useState } from "react";
-import { CloseRateModalContext, RefreshRateLibrariesContext, RefreshRatesContext, UpsertRateContext } from "../Hooks/CustomHooks";
+import { CloseRateModalContext, RefreshRateLibrariesContext, UpsertRateContext } from "../Hooks/CustomHooks";
 import { IRateLibraryProps } from "../Models/RateLibraryProps";
 import { rateController } from "../Controllers/ControllerSingletons";
-import { EntityDashboard, FieldsContainer, FormWithTableContainer, PanelContainer, PartialFieldsContainer } from "../CSS/Common";
-import { EntityOperationsPanel } from "./Button Panels/EntityOperationsPanel";
+import { EntityDashboard, PanelContainer } from "../CSS/Common";
 import { EntityUpsertPanel } from "./Button Panels/EntityUpsertPanel";
-import { ControlledPopup } from "./ControlledPop";
-import { RateLibraryForm, RatesTable } from "./RateLibraryForm";
+import { reformatDate } from "../Utilities/UtilityFunctions";
 
 export interface IRatesTableRowProps {
   data: IRateProps;
@@ -28,8 +26,9 @@ color: black;
 flex-flow: column nowrap;
 justify-content: flex-start; 
 align-items: flex-start;
-gap: 0.5rem;
-margin: 0.75rem;
+border-style: solid;
+border-color: grey;
+border-width: 1px;
 `;
 
 const FormInputRow = styled.div`
@@ -37,22 +36,52 @@ display: flex;
 flex-flow: row nowrap;
 justify-content: flex-start; 
 align-items: flex-start;
-`; 
+margin: 0.5rem;
+
+& > label {
+  width: 8rem;
+  text-align: right;
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
+& > input, & > select, & > textarea {
+
+  font-size: 0.8rem;
+
+  &.display-field {
+    border-color: white;
+    border-style: solid;
+    pointer-events: none;
+    color: black;
+  }
+}
+
+& > textarea {
+  height: 7rem;
+}
+`;
+
+const StyledRateTableRow = styled.tr`
+& > td.ratetablerow-description {
+  width: 30rem;
+}
+`;
 
 export function RateTableRow(props: IRatesTableRowProps) {
   return (
-    <tr
+    <StyledRateTableRow
       onClick={(e) => { setTimeout(() => props.activateRow(e, props.data), 50) }}
       onDoubleClick={(e) => { props.activateRow(e, props.data) }}
       className={props.isActive ? 'active-row' : ''}>
       <td>{props.data.itemCode}</td>
-      <td>{props.data.description}</td>
+      <td className="ratetablerow-description">{props.data.description}</td>
       <td>{props.data.rateGroup}</td>
       <td>{props.data.value}</td>
       <td>{props.data.unitOfMeasure}</td>
-      <td>{props.data.dateAdded}</td>
-      <td>{props.data.dateModified}</td>
-    </tr>
+      <td>{reformatDate(props.data.dateAdded)}</td>
+      <td>{reformatDate(props.data.dateModified)}</td>
+    </StyledRateTableRow>
   );
 }
 
@@ -85,7 +114,7 @@ export function RateForm(props: IRateFormProps) {
         updatedRate.unitOfMeasure = unitOfMeasure;
         updatedRate.value = rate;
         
-        if(props.isInsert) {
+        if(!props.isInsert) {
           updatedRate.dateModified = new Date().toLocaleString();
         }
         // POST request to update rate library
@@ -128,7 +157,7 @@ export function RateForm(props: IRateFormProps) {
       <FormInputs>
         <FormInputRow>
           <label htmlFor="rRateLibrary">Rate Library:</label>
-          <input id="rRateLibrary" className="display-field" name="rRateLibrary" type="text" value={props.rateLibrary?.name} readOnly={true}></input>
+          <input id="rRateLibrary" className="display-field" name="rRateLibrary" type="text" value={props.rateLibrary?.name} readOnly={true} disabled={true}></input>
         </FormInputRow>
         <FormInputRow>
           <label htmlFor="rItemCode">Item Code:</label>
@@ -153,17 +182,17 @@ export function RateForm(props: IRateFormProps) {
           </select>
         </FormInputRow>
         <FormInputRow>
+          <label htmlFor="rUnitOfMeasure">UOM:</label>
+          <select id="rUnitOfMeasure" name="rUnitOfMeasure" value={unitOfMeasure} onChange={(e) => setUnitOfMeasure(e.target.value)}>
+            <option value={1}>ft</option>
+            <option value={2}>ft 2</option>
+            <option value={3}>ft 2</option>
+          </select>
+        </FormInputRow>            
+        <FormInputRow>
           <label htmlFor="rRate">Rate:</label>
           <input id="rRate" name="rRate" type="text" value={rate} readOnly={!props.isInsert}></input>
-        </FormInputRow>
-        <FormInputRow>
-          <label htmlFor="rDateAdded">Date Added:</label>
-          <input id="rDateAdded" className="display-field" name="rDateAdded" type="text" value={rateItem?.dateAdded} readOnly={true}></input>
-        </FormInputRow>
-        <FormInputRow>
-          <label htmlFor="rDateModified">Date Modified:</label>
-          <input id="rDateModified" className="display-field" name="rDateModified" type="text" value={rateItem?.dateModified} readOnly={true}></input>
-        </FormInputRow>                                               
+        </FormInputRow>                                           
       </FormInputs>
     </form>
   );

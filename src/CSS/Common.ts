@@ -92,16 +92,16 @@ padding: 5px 10px 5px 10px;
         } 
     }
 
-    &.insert-button svg {
+    &.insert-button:not([disabled]) svg {
         color: green;
     }
-    &.edit-button svg {
+    &.edit-button:not([disabled]) svg {
         color: black;
     }
-    &.delete-button svg {
+    &.delete-button:not([disabled]) svg {
         color: red;
     }
-    &.refresh-button svg {
+    &.refresh-button:not([disabled]) svg {
         color: blue;
     }
 }
@@ -121,4 +121,11 @@ export const PartialFieldsContainer = styled.div`
 display: flex;
 flex-flow: row nowrap;
 justify-content: center; 
+`;
+
+export const EmptyTableContent = styled.tr`
+height: 4rem;
+text-align: center;
+vertical-align: middle;
+line-height: 4rem;
 `;

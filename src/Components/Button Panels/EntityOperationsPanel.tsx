@@ -10,6 +10,7 @@ export interface IEntityOperationsProps {
     editHandler: () => void;
     deleteHandler: () => void;
     refreshHandler: () => void;
+    disable: boolean;
 }
 
 export function EntityOperationsPanel(props: IEntityOperationsProps) {
@@ -17,16 +18,16 @@ export function EntityOperationsPanel(props: IEntityOperationsProps) {
     return (
         <ButtonPanelContainer>
             <ButtonContainer>
-                <Button onClick={props.insertHandler} variant='contained' startIcon={<AddIcon />} className='insert-button'>Insert</Button><br></br>
+                <Button onClick={props.insertHandler} disabled={props.disable} variant='contained' startIcon={<AddIcon />} className='insert-button'>Insert</Button><br></br>
             </ButtonContainer>
             <ButtonContainer>
-                <Button onClick={props.editHandler} variant='contained' startIcon={<EditIcon />} className='edit-button'>Edit</Button><br></br>
+                <Button onClick={props.editHandler} disabled={props.disable} variant='contained' startIcon={<EditIcon />} className='edit-button'>Edit</Button><br></br>
             </ButtonContainer>
             <ButtonContainer>
-                <Button onClick={props.deleteHandler} variant='contained' startIcon={<ClearIcon />} className='delete-button'>Delete</Button><br></br>
+                <Button onClick={props.deleteHandler} disabled={props.disable} variant='contained' startIcon={<ClearIcon />} className='delete-button'>Delete</Button><br></br>
             </ButtonContainer>
             <ButtonContainer>
-                <Button onClick={props.refreshHandler} variant='contained' startIcon={<RefreshIcon />} className='refresh-button'>Refresh</Button><br></br>
+                <Button onClick={props.refreshHandler} disabled={props.disable} variant='contained' startIcon={<RefreshIcon />} className='refresh-button'>Refresh</Button><br></br>
             </ButtonContainer>
         </ButtonPanelContainer>
     );

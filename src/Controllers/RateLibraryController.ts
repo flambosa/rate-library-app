@@ -1,3 +1,4 @@
+import { AxiosResponse } from "axios";
 import { IRateLibraryProps } from "../Models/RateLibraryProps";
 import { IRateLibraryService } from "./Services/IRateLibraryService";
 
