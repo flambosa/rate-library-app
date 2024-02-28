@@ -235,6 +235,9 @@ export function RateLibraryView(props: IRateLibraryFormProps) {
           if(!props.isInsert) {
             updatedRateLibrary.dateModified = new Date().toLocaleString();
           }
+          else {
+            updatedRateLibrary.rateLibraryKey = crypto.randomUUID();
+          }
           // POST request to update rate library
           rateLibraryController.updateRateLibrary(updatedRateLibrary)
           .then(returnedRateLibrary => {

@@ -27,7 +27,8 @@ export function equals<TItem extends Object>(item1 : TItem, item2: TItem) : bool
 
     try {
       const date = new Date(dateString);
-      return date.toLocaleString();
+      //return date.toLocaleString();
+      return dateString;
     }
     catch(e) {
       console.log(e);

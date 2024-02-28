@@ -117,6 +117,10 @@ export function RateForm(props: IRateFormProps) {
         if(!props.isInsert) {
           updatedRate.dateModified = new Date().toLocaleString();
         }
+        else {
+          updatedRate.rateKey = crypto.randomUUID();
+          updatedRate.rateLibraryKey = props.rateLibrary.rateLibraryKey;
+        }
         // POST request to update rate library
         rateController.updateRate(updatedRate)
         .then(returnedRate => {
@@ -191,7 +195,7 @@ export function RateForm(props: IRateFormProps) {
         </FormInputRow>            
         <FormInputRow>
           <label htmlFor="rRate">Rate:</label>
-          <input id="rRate" name="rRate" type="text" value={rate} readOnly={!props.isInsert}></input>
+          <input id="rRate" name="rRate" type="text" value={rate} readOnly={!props.isInsert} onChange={(e) => setRate(+e.target.value)}></input>
         </FormInputRow>                                           
       </FormInputs>
     </form>
